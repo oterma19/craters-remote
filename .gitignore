@@ -1,0 +1,10 @@
+.claude/
+
+# Сырые спутниковые/DEM-экспорты из Earth Engine (тяжёлые, легко переполучить
+# заново через gee_crater_app.js) и их png-превью — не нужны в репозитории.
+*.tif
+S2_RGB_*.png
+DEM_*.png
+Hillshade_*.png
+Slope_*.png
+S1_VVVH_*.png
