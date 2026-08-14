@@ -201,15 +201,15 @@ img_w = Inches(5.7)
 ox, oy, w, h = add_image_fit(s, "S2_RGB_Barringer__Meteor_Crater______.png",
                               SLIDE_W - Inches(0.5) - img_w, Inches(0.5), img_w, SLIDE_H - Inches(1.0),
                               center_h=True, center_v=True)
-add_text(s, Inches(0.7), Inches(1.7), Inches(6.6), Inches(2.6),
+add_text(s, Inches(0.7), Inches(1.7), Inches(6.2), Inches(2.6),
           "Дистанционное зондирование\nземных кратеров как инструмент\nраспознавания импактных структур",
           size=26, color=CREAM, bold=True, font=HEAD_FONT, line_spacing=1.12)
-add_text(s, Inches(0.7), Inches(4.15), Inches(6.6), Inches(0.7),
+add_text(s, Inches(0.7), Inches(4.15), Inches(6.2), Inches(0.7),
           "Морфометрия по DEM, Sentinel-1 и Sentinel-2:\nBarringer, Lonar, Wolfe Creek",
           size=14.5, color=GOLD, italic=True, line_spacing=1.15)
-add_text(s, Inches(0.7), Inches(5.6), Inches(6.6), Inches(0.4),
+add_text(s, Inches(0.7), Inches(5.6), Inches(6.2), Inches(0.4),
           "Баканас Е.С.¹˒², Бадак Л.А.²", size=15, color=CREAM, bold=True)
-add_text(s, Inches(0.7), Inches(6.0), Inches(6.6), Inches(1.25),
+add_text(s, Inches(0.7), Inches(6.0), Inches(6.2), Inches(1.25),
           "¹ Научный центр оперативного мониторинга Земли АО «Российские космические системы», Москва\n"
           "² Институт астрономии Российской академии наук, Москва",
           size=10.5, color=MUTED, line_spacing=1.25)
