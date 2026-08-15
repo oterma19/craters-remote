@@ -358,7 +358,7 @@ steps = [
     ("Координаты", "справочник кратеров или клик по центру на снимке", TERRACOTTA),
     ("N азимутов", "радиальные лучи вокруг центра кратера", SALMON),
     ("Выборка вдоль лучей", "DEM + VV/VH (Sentinel-1) + slope + hillshade\n(Google Earth Engine)", GOLD),
-    ("CSV → Python", "дно, гребень вала, диаметр, глубина,\nиндекс округлости", SAGE),
+    ("CSV → Python", "дно, гребень вала, диаметр, глубина,\nнеоднородность радиуса вала (CV)", SAGE),
     ("Сопоставление", "с публикациями и эталонной кривой\nглубина/диаметр", RGBColor(0x8a, 0x6b, 0xb0)),
 ]
 n = len(steps)
@@ -475,6 +475,10 @@ for i, (path, name, dbtxt, color) in enumerate(s1_imgs):
               dbtxt, size=30, color=color, bold=True, align=PP_ALIGN.CENTER, font=HEAD_FONT)
     add_text(s, x, y9 + img_h9 + Inches(1.22), col_w9, Inches(0.3),
               "вал ярче дна (VV)", size=10.5, color=MUTED, align=PP_ALIGN.CENTER, italic=True)
+add_text(s, MARGIN, y9 + img_h9 + Inches(1.62), SLIDE_W - 2 * MARGIN, Inches(0.5),
+          "Различия обратного рассеяния интерпретируются с учётом шероховатости, влажности, геометрии "
+          "наблюдения и морфологии рельефа — это эмпирическое наблюдение по трём объектам, а не общий закон.",
+          size=10.5, color=MUTED, italic=True, align=PP_ALIGN.CENTER, line_spacing=1.2)
 footer_page(s, next(page_num))
 
 # ---- Слайд 9b: радар vs оптика в литературе -----------------------------------------------

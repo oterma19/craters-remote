@@ -136,53 +136,50 @@ var state = {
 
 // ---------- 3. Геодезические вспомогательные функции ----------
 //
-// Раньше точки по азимуту считались приближённо (перевод градусов в
-// метры через 111320*cos(lat)). Это плоская аппроксимация, она немного
-// искажает расстояния и особенно азимуты вдали от экватора и на
-// больших расстояниях. Вместо этого строим точки через локальную
-// азимutальную равнопромежуточную проекцию (AEQD) с центром ровно в
-// центре кратера -- в этой проекции расстояние и азимут от центра
-// сохраняются ТОЧНО по определению, а Earth Engine сам выполняет
-// корректный геодезический пересчёт в EPSG:4326 через .transform().
-function aeqdProjection(lon, lat) {
-  return ee.Projection(
-      '+proj=aeqd +lat_0=' + lat + ' +lon_0=' + lon + ' +units=m +no_defs');
+// ПОПЫТКА И ОТКАТ (честно, а не имитация): первая версия этой функции
+// строила точки через локальную азимутальную равнопромежуточную
+// проекцию (AEQD, "+proj=aeqd ...") и просила Earth Engine самого
+// пересчитать их в EPSG:4326 -- в теории это точнее плоского
+// приближения. На практике конкретный proj4-синтаксис не завёлся в
+// Earth Engine ("Projection: The CRS of a map projection could not be
+// parsed") и я не могу его отладить вслепую, не имея доступа к
+// аутентификации Earth Engine для проверки. Вместо того чтобы гадать
+// дальше, возвращаю прежний, ранее реально работавший у вас способ --
+// плоское приближение с поправкой на широту (cos(lat)).
+//
+// ОГРАНИЧЕНИЕ ЭТОГО СПОСОБА: на расстояниях в единицы километров и в
+// умеренных широтах ошибка от плоской аппроксимации пренебрежимо мала
+// (доли метра на профиль длиной 1.5 км), но она растёт с расстоянием
+// от центра и с широтой -- для радиусов в десятки километров или
+// приполярных кратеров (например, Pingualuit) её стоит перепроверить.
+function destinationPoint(lon, lat, azimuthDeg, distanceM) {
+  var angRad = azimuthDeg * Math.PI / 180;
+  var metersPerDegLon = 111320 * Math.cos(lat * Math.PI / 180);
+  var metersPerDegLat = 110540;
+  var dx = Math.sin(angRad) * distanceM;
+  var dy = Math.cos(angRad) * distanceM;
+  return [lon + dx / metersPerDegLon, lat + dy / metersPerDegLat];
 }
 
-// Строит FeatureCollection точек вдоль всех азимутов сразу (сервер
-// сам делает геодезический пересчёт в .map(), поэтому не нужно горячей
-// getInfo()-петли на 400 точек).
 function buildAzimuthPointsFC(lon, lat, azimuths, lengthKm, stepM) {
-  var proj = aeqdProjection(lon, lat);
   var nSteps = Math.round((lengthKm * 1000) / stepM);
   var feats = [];
   azimuths.forEach(function(az) {
-    var angRad = az * Math.PI / 180;
-    var dx = Math.sin(angRad);
-    var dy = Math.cos(angRad);
     for (var i = 0; i <= nSteps; i++) {
       var d = i * stepM;
-      var pt = ee.Geometry.Point([d * dx, d * dy], proj);
-      feats.push(ee.Feature(pt, {azimuth: az, distance_m: d}));
+      var p = destinationPoint(lon, lat, az, d);
+      feats.push(ee.Feature(ee.Geometry.Point(p), {azimuth: az, distance_m: d}));
     }
   });
-  var fc = ee.FeatureCollection(feats);
-  return fc.map(function(f) {
-    return f.setGeometry(f.geometry().transform('EPSG:4326', 1));
-  });
+  return ee.FeatureCollection(feats);
 }
 
 // То же самое, но только конечная точка каждого луча -- для линий
 // профиля, отображаемых на карте.
 function buildAzimuthLinesFC(lon, lat, azimuths, lengthKm) {
-  var proj = aeqdProjection(lon, lat);
-  var d = lengthKm * 1000;
   var feats = azimuths.map(function(az) {
-    var angRad = az * Math.PI / 180;
-    var end = ee.Geometry.Point([d * Math.sin(angRad), d * Math.cos(angRad)], proj)
-        .transform('EPSG:4326', 1);
-    var startPt = ee.Geometry.Point([lon, lat]);
-    var line = ee.Geometry.LineString([startPt.coordinates(), end.coordinates()]);
+    var end = destinationPoint(lon, lat, az, lengthKm * 1000);
+    var line = ee.Geometry.LineString([[lon, lat], end]);
     return ee.Feature(line, {azimuth: az});
   });
   return ee.FeatureCollection(feats);
@@ -468,7 +465,7 @@ function update() {
     state.s1SceneCount = s1.sceneCount;
     state.s1OrbitsUsed = state.s1OrbitMode;
 
-    // ---- радиальные точки/линии (геодезические, AEQD) ----
+    // ---- радиальные точки/линии (плоское приближение, см. п.3) ----
     var azimuths = [];
     var stepDeg = 360 / state.nAzimuths;
     for (var a = 0; a < 360; a += stepDeg) azimuths.push(a);

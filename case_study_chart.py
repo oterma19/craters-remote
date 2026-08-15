@@ -52,7 +52,7 @@ def build_chart(csv_path, title, output_png):
 
     mean_rim_radius = float(np.mean(list(rim_radius.values())))
     mean_rim_elev = float(np.mean(list(rim_elev.values())))
-    circularity = float(np.std(list(rim_radius.values())) / mean_rim_radius * 100)
+    rim_radius_cv_percent = float(np.std(list(rim_radius.values())) / mean_rim_radius * 100)
     depth = mean_rim_elev - floor_elev
 
     pairs, seen = [], set()
@@ -113,7 +113,7 @@ def build_chart(csv_path, title, output_png):
     ax_polar.tick_params(colors=FG, labelsize=8)
     ax_polar.grid(color=FG, alpha=0.2)
     ax_polar.spines["polar"].set_color(FG)
-    ax_polar.set_title(f"D ≈ {2*mean_rim_radius:.0f} м · округлость {circularity:.1f}%",
+    ax_polar.set_title(f"D ≈ {2*mean_rim_radius:.0f} м · неоднородность радиуса {rim_radius_cv_percent:.1f}%",
                         color=FG, fontsize=10.5, pad=16)
 
     fig.suptitle(title, color=FG, fontsize=15, fontweight="bold", y=1.01)
@@ -121,7 +121,7 @@ def build_chart(csv_path, title, output_png):
     plt.savefig(output_png, dpi=200, facecolor=BG, bbox_inches="tight")
     plt.close(fig)
     print(f"{output_png}: D={2*mean_rim_radius:.0f} м, depth={depth:.0f} м, "
-          f"floor={floor_elev:.0f} м, rim={mean_rim_elev:.0f} м, circ={circularity:.1f}%")
+          f"floor={floor_elev:.0f} м, rim={mean_rim_elev:.0f} м, rim_cv={rim_radius_cv_percent:.1f}%")
 
 
 JOBS = [

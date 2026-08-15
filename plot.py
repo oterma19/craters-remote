@@ -15,8 +15,11 @@ line-plot("высота от расстояния") строим два взаи
      кратеров показывают, что вал приподнят одинаково со всех сторон,
      а чаша при этом остаётся симметричной чашей.
   2) Справа — полярная "визитка" вала: высота и радиус гребня по всем
-     8 азимутам сразу, что наглядно показывает круговую симметрию
-     (характерный признак ударного, а не эрозионного происхождения).
+     8 азимутам сразу, что наглядно показывает степень круговой
+     симметрии вала. Круговая симметрия сама по себе не доказывает
+     ударное происхождение (она встречается и у кальдер, карстовых
+     воронок и т.п.) — это лишь один из морфологических признаков,
+     которые сопоставляются с независимыми геологическими данными.
 
 Нужен файл profile_*.csv в этой же папке (экспорт из Earth Engine).
 Установка библиотек: pip install numpy matplotlib pandas
@@ -89,12 +92,12 @@ for az, s in profiles.items():
 
 mean_rim_radius = float(np.mean(list(rim_radius.values())))
 mean_rim_elev = float(np.mean(list(rim_elev.values())))
-circularity = float(np.std(list(rim_radius.values())) / mean_rim_radius * 100)
+rim_radius_cv_percent = float(np.std(list(rim_radius.values())) / mean_rim_radius * 100)
 depth = mean_rim_elev - floor_elev
 
 print(f"Дно (центр): {floor_elev:.0f} м; средний гребень вала: {mean_rim_elev:.0f} м")
 print(f"Глубина вал->дно: {depth:.0f} м; диаметр по гребню: {2 * mean_rim_radius:.0f} м")
-print(f"Индекс округлости (разброс радиуса гребня): {circularity:.1f}%")
+print(f"Относительная неоднородность радиуса вала (CV): {rim_radius_cv_percent:.1f}%")
 
 # ---------------------------------------------------------------------------
 # Пары противоположных азимутов -> полные диаметры через центр
@@ -225,7 +228,7 @@ ax_polar.grid(color=FG, alpha=0.2)
 ax_polar.spines["polar"].set_color(FG)
 ax_polar.set_title(
     f"Форма гребня вала (вид сверху)\nдиаметр ≈ {2 * mean_rim_radius:.0f} м · "
-    f"округлость {circularity:.1f}%",
+    f"неоднородность радиуса {rim_radius_cv_percent:.1f}%",
     color=FG, fontsize=12, pad=20,
 )
 
