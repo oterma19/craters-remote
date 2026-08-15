@@ -12,9 +12,9 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-RIM_SEARCH_FRACTIONS = (0.2, 0.6)
+RIM_SEARCH_FRACTIONS = (0.2, 0.64)
 PALETTE = ["#c1440e", "#e07a5f", "#f2cc8f", "#5b8a72"]
-BG = "#0b0d13"
+BG = "#10203c"
 FG = "#e8e6df"
 plt.rcParams["font.family"] = "DejaVu Sans"
 

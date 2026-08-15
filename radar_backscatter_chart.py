@@ -19,7 +19,7 @@ JOBS = [
     ("profile_Wolfe_Creek___________.csv", "Wolfe Creek", 150, 500, "#e0a458"),
 ]
 
-BG = "#0b0d13"
+BG = "#10203c"
 FG = "#e8e6df"
 plt.rcParams["font.family"] = "DejaVu Sans"
 

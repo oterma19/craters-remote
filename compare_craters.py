@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-RIM_SEARCH_FRACTIONS = (0.2, 0.6)  # доля max_radius_m -- полоса поиска гребня
+RIM_SEARCH_FRACTIONS = (0.2, 0.64)  # доля max_radius_m -- полоса поиска гребня
 
 
 def measure_crater(csv_path):
@@ -115,7 +115,7 @@ for name, info in CRATERS.items():
 # График
 # ---------------------------------------------------------------------------
 
-BG = "#0b0d13"
+BG = "#10203c"
 FG = "#e8e6df"
 plt.rcParams["font.family"] = "DejaVu Sans"
 

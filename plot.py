@@ -38,7 +38,7 @@ CRATER_TITLE = "Кратер Барринджер (Meteor Crater), Аризон�
 OUTPUT_PNG = "crater_profile.png"
 
 RIM_SEARCH_MIN_M = 300   # полоса поиска гребня вала, м от центра
-RIM_SEARCH_MAX_M = 900
+RIM_SEARCH_MAX_M = 960
 
 PALETTE = ["#c1440e", "#e07a5f", "#f2cc8f", "#5b8a72"]  # 4 диаметра
 RIDGE_OFFSET = 70  # вертикальный сдвиг между разрезами на левой панели, м
@@ -130,7 +130,7 @@ def diameter_xy(az, opp):
 # ---------------------------------------------------------------------------
 
 plt.rcParams["font.family"] = "DejaVu Sans"
-BG = "#0b0d13"
+BG = "#10203c"
 FG = "#e8e6df"
 
 fig = plt.figure(figsize=(21, 8.5), facecolor=BG)

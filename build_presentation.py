@@ -6,6 +6,8 @@
 Запуск: python build_presentation.py
 """
 
+from itertools import count
+
 from PIL import Image
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu
@@ -18,8 +20,8 @@ from pptx.oxml.ns import qn
 # Палитра и константы
 # ---------------------------------------------------------------------------
 
-BG = RGBColor(0x0B, 0x0D, 0x13)
-CARD = RGBColor(0x15, 0x18, 0x1F)
+BG = RGBColor(0x10, 0x20, 0x3C)
+CARD = RGBColor(0x1C, 0x2E, 0x4A)
 TERRACOTTA = RGBColor(0xC1, 0x44, 0x0E)
 CREAM = RGBColor(0xE8, 0xE6, 0xDF)
 MUTED = RGBColor(0x9B, 0x97, 0x8D)
@@ -194,6 +196,7 @@ def footer_page(slide, n):
 # ---------------------------------------------------------------------------
 
 prs = new_pres()
+page_num = count(2)
 
 # ---- Слайд 1: титул ------------------------------------------------------
 s = add_slide(prs)
@@ -237,7 +240,7 @@ add_text(s, MARGIN + Inches(0.35), Inches(6.12), SLIDE_W - 2 * MARGIN - Inches(0
           "перекрыты осадками, растительностью или водой — поэтому выявление и картографирование "
           "сохранившихся структур по данным ДЗЗ имеет существенное научное и прикладное значение.",
           size=13, color=CREAM, italic=True, line_spacing=1.2, anchor=MSO_ANCHOR.MIDDLE)
-footer_page(s, 2)
+footer_page(s, next(page_num))
 
 # ---- Слайд 3: как распознают -----------------------------------------------
 s = add_slide(prs)
@@ -275,7 +278,44 @@ add_text(s, MARGIN, Inches(5.9), SLIDE_W - 2 * MARGIN, Inches(1.0),
           "происхождения — морфология формирует рабочую гипотезу, а окончательная идентификация "
           "требует сопоставления с независимыми геологическими данными.",
           size=13.5, color=MUTED, italic=True, line_spacing=1.25)
-footer_page(s, 3)
+footer_page(s, next(page_num))
+
+# ---- Слайд 3b: почему одной морфологии недостаточно -----------------------------------------------
+s = add_slide(prs)
+add_title(s, "Почему одной морфологии недостаточно",
+           "И зачем тогда вообще нужен дистанционный этап")
+
+tiers = [
+    ("1", "Морфология и ДЗЗ (наш этап)", "весь земной шар, часы, бесплатно",
+     "не доказательство: похожую форму даёт вулканизм и эрозия", TERRACOTTA, Inches(11.8)),
+    ("2", "Геофизика", "сужает круг кандидатов",
+     "тоже не доказательство: аномалию дают и другие тела", GOLD, Inches(9.3)),
+    ("3", "Лаборатория (петрография + геохимия)", "шлифы под микроскопом, месяцы работы",
+     "PDF, шаттер-конусы, коэсит — доказательство (Koeberl, 2004)", SAGE, Inches(6.8)),
+]
+y_t = Inches(1.65)
+bar_h = Inches(1.2)
+gap_t = Inches(0.15)
+for num, head, cheap, strict, color, bar_w in tiers:
+    x_t = MARGIN + (SLIDE_W - 2 * MARGIN - bar_w) / 2
+    add_card(s, x_t, y_t, bar_w, bar_h, color=CARD)
+    add_circle_num(s, x_t + Inches(0.25), y_t + Inches(0.3), Inches(0.55), num, color)
+    add_text(s, x_t + Inches(1.0), y_t + Inches(0.14), bar_w - Inches(1.3), Inches(0.35),
+              head, size=15, color=color, bold=True, font=HEAD_FONT)
+    add_rich(s, x_t + Inches(1.0), y_t + Inches(0.56), bar_w - Inches(1.3), Inches(0.58),
+              [[("+  ", SAGE, True), (cheap, CREAM, False, False, 11)],
+               [("−  ", SALMON, True), (strict, MUTED, False, True, 10.5)]],
+              line_spacing=1.15)
+    y_t += bar_h + gap_t
+
+add_card(s, MARGIN, y_t + Inches(0.05), SLIDE_W - 2 * MARGIN, Inches(1.25), color=CARD)
+add_rich(s, MARGIN + Inches(0.35), y_t + Inches(0.24), SLIDE_W - 2 * MARGIN - Inches(0.7), Inches(1.0),
+          [[("Стоит ли тогда заниматься дистанционным этапом? ", GOLD, True, False, 13.5),
+            ("Да — лабораторная проверка дорога и медленна и не может применяться подряд ко всем "
+             "потенциальным структурам. Наш метод — быстрый воспроизводимый фильтр, который сужает "
+             "круг кандидатов для дорогой проверки, а не заменяет её.", CREAM, False, True, 13.5)]],
+          line_spacing=1.28)
+footer_page(s, next(page_num))
 
 # ---- Слайд 4: данные ДЗЗ -----------------------------------------------
 s = add_slide(prs)
@@ -308,7 +348,7 @@ add_text(s, MARGIN, Inches(5.65), SLIDE_W - 2 * MARGIN, Inches(1.15),
           "для систематического морфометрического анализа известных структур и поиска новых "
           "кандидатов (Gottwald et al., 2017).",
           size=12.5, color=MUTED, italic=True, line_spacing=1.25)
-footer_page(s, 4)
+footer_page(s, next(page_num))
 
 # ---- Слайд 5: метод/конвейер -----------------------------------------------
 s = add_slide(prs)
@@ -349,11 +389,11 @@ add_text(s, MARGIN + Inches(0.35), Inches(6.08), SLIDE_W - 2 * MARGIN - Inches(0
           "Источник рельефа выбирается автоматически по приоритету: лидар USGS 3DEP (1 м, США) → "
           "Copernicus GLO-30 (~30 м, глобально) → SRTM (запасной вариант).",
           size=12.5, color=CREAM, italic=True, anchor=MSO_ANCHOR.MIDDLE, line_spacing=1.2)
-footer_page(s, 5)
+footer_page(s, next(page_num))
 
 
 # ---- Слайды 6-8: кейсы -----------------------------------------------
-def case_slide(n, title_txt, chart_path, s2_path, color, stat_rows, note):
+def case_slide(title_txt, chart_path, s2_path, color, stat_rows, note):
     s = add_slide(prs)
     add_title(s, title_txt)
 
@@ -383,11 +423,11 @@ def case_slide(n, title_txt, chart_path, s2_path, color, stat_rows, note):
     yy += Inches(0.1)
     add_text(s, right_x + pad, yy, right_w - 2 * pad, card_h - (yy - ty) - Inches(0.2),
               note, size=11, color=CREAM, italic=True, line_spacing=1.22)
-    footer_page(s, n)
+    footer_page(s, next(page_num))
     return s
 
 
-case_slide(6, "Кейс 1 — Барринджер (Meteor Crater)",
+case_slide("Кейс 1 — Барринджер (Meteor Crater)",
            "case_Barringer.png", "S2_RGB_Barringer__Meteor_Crater______.png", TERRACOTTA,
            [("Диаметр:", "1200 м", "1200 м"),
             ("Глубина:", "162 м", "170 м"),
@@ -395,18 +435,18 @@ case_slide(6, "Кейс 1 — Барринджер (Meteor Crater)",
            "Осадочные породы, ~50 тыс. лет. Наилучшее совпадение с публикацией — "
            "валидация метода на эталонном объекте.")
 
-case_slide(7, "Кейс 2 — Lonar",
+case_slide("Кейс 2 — Lonar",
            "case_Lonar.png", "S2_RGB_Lonar_______.png", SAGE,
-           [("Диаметр:", "1785 м", "1830 м"),
-            ("Глубина:", "100 м", "~137 м"),
-            ("d/D:", "0.056", "0.075")],
+           [("Диаметр:", "1890 м", "1830 м"),
+            ("Глубина:", "111 м", "~137 м"),
+            ("d/D:", "0.059", "0.075")],
            "Базальт (Деканские траппы). Два конфликтующих датирования: ~570 или ~37.5 тыс. лет. "
            "Глубина занижена — вероятно, DEM видит поверхность озера в кратере, а не истинное дно.")
 
-case_slide(8, "Кейс 3 — Wolfe Creek",
+case_slide("Кейс 3 — Wolfe Creek",
            "case_WolfeCreek.png", "S2_RGB_Wolfe_Creek___________.png", GOLD,
-           [("Диаметр:", "900 м", "892 м"),
-            ("Глубина:", "45 м", "178 м*")],
+           [("Диаметр:", "930 м", "892 м"),
+            ("Глубина:", "46 м", "178 м*")],
            "Песчаник, ~120 тыс. лет. *Исходная глубина по публикации — кратер занесён ~120 м песка; "
            "наш профиль отражает современную, а не исходную форму.")
 
@@ -435,14 +475,63 @@ for i, (path, name, dbtxt, color) in enumerate(s1_imgs):
               dbtxt, size=30, color=color, bold=True, align=PP_ALIGN.CENTER, font=HEAD_FONT)
     add_text(s, x, y9 + img_h9 + Inches(1.22), col_w9, Inches(0.3),
               "вал ярче дна (VV)", size=10.5, color=MUTED, align=PP_ALIGN.CENTER, italic=True)
-footer_page(s, 9)
+footer_page(s, next(page_num))
+
+# ---- Слайд 9b: радар vs оптика в литературе -----------------------------------------------
+s = add_slide(prs)
+add_title(s, "Радар vs оптика для кратеров: что уже сделано",
+           "Наш простой VV/VH — базовый вариант давно известного принципа")
+
+col_w9b = Inches(5.75)
+gap9b = Inches(0.35)
+x1b, x2b = MARGIN, MARGIN + col_w9b + gap9b
+y9b = Inches(1.75)
+col_h9b = Inches(4.15)
+
+add_card(s, x1b, y9b, col_w9b, col_h9b, color=CARD)
+add_text(s, x1b + Inches(0.35), y9b + Inches(0.25), col_w9b - Inches(0.7), Inches(0.4),
+          "SIR-C/X-SAR, 1994", size=17, color=TERRACOTTA, bold=True, font=HEAD_FONT)
+add_text(s, x1b + Inches(0.35), y9b + Inches(0.68), col_w9b - Inches(0.7), Inches(0.35),
+          "McHone et al., 2002, Meteoritics & Planetary Science", size=11, color=MUTED, italic=True)
+add_rich(s, x1b + Inches(0.35), y9b + Inches(1.2), col_w9b - Inches(0.7), Inches(2.8),
+          [[("10 кратеров радаром, в т.ч. наш Wolfe Creek", CREAM, True, False, 13.5)],
+           [("методы: L/C/X-диапазоны, поляризация", MUTED, False, False, 12.5)],
+           [("", CREAM, False, False, 6)],
+           [("Aorounga (Чад): на оптике — кольцо ~11 км;", CREAM, False, False, 13.5)],
+           [("радар вскрыл погребённое под песком второе", CREAM, False, False, 13.5)],
+           [("кольцо диаметром >17 км, невидимое в оптике", CREAM, False, False, 13.5)]],
+          line_spacing=1.35)
+
+add_card(s, x2b, y9b, col_w9b, col_h9b, color=CARD)
+add_text(s, x2b + Inches(0.35), y9b + Inches(0.25), col_w9b - Inches(0.7), Inches(0.4),
+          "ALOS PALSAR-2, 2017", size=17, color=SAGE, bold=True, font=HEAD_FONT)
+add_text(s, x2b + Inches(0.35), y9b + Inches(0.68), col_w9b - Inches(0.7), Inches(0.35),
+          "van Gasselt et al., Earth, Planets and Space", size=11, color=MUTED, italic=True)
+add_rich(s, x2b + Inches(0.35), y9b + Inches(1.2), col_w9b - Inches(0.7), Inches(2.8),
+          [[("Структура Oasis, Ливия (сильно эродирована)", CREAM, True, False, 13.5)],
+           [("методы: L-диапазон, амплитуда, фазовая", MUTED, False, False, 12.5)],
+           [("когерентность, поляриметрическая декомпозиция", MUTED, False, False, 12.5)],
+           [("", CREAM, False, False, 6)],
+           [("Раскрыли подповерхностное напластование и", CREAM, False, False, 13.5)],
+           [("палеорусло реки — размытые/невидимые на Landsat", CREAM, False, False, 13.5)]],
+          line_spacing=1.35)
+
+y9b_bottom = y9b + col_h9b + Inches(0.2)
+add_card(s, MARGIN, y9b_bottom, SLIDE_W - 2 * MARGIN, Inches(1.05), color=CARD)
+add_text(s, MARGIN + Inches(0.35), y9b_bottom + Inches(0.14), SLIDE_W - 2 * MARGIN - Inches(0.7), Inches(0.8),
+          "Общий вывод этой литературы: длинноволновый (L-диапазон) радар проникает сквозь сухой песок "
+          "и вскрывает погребённые структуры, невидимые в оптике. Наш анализ (C-диапазон Sentinel-1, "
+          "медиана VV/VH) проще и не видит сквозь грунт — это базовый поверхностный сигнал шероховатости "
+          "вала; следующий шаг — поляриметрия и L-диапазон (ALOS-2, NISAR).",
+          size=11.5, color=CREAM, italic=True, line_spacing=1.22)
+footer_page(s, next(page_num))
 
 # ---- Слайд 10: геология (главный результат) -----------------------------------------------
 s = add_slide(prs)
 add_title(s, "Наши измерения vs публикации vs эталон свежих кратеров")
 add_image_fit(s, "crater_geology_comparison.png", MARGIN, Inches(1.55),
                SLIDE_W - 2 * MARGIN, Inches(5.5), center_h=True, center_v=False)
-footer_page(s, 10)
+footer_page(s, next(page_num))
 
 # ---- Слайд 11: ограничения -----------------------------------------------
 s = add_slide(prs)
@@ -465,7 +554,7 @@ for i, (head, desc, color) in enumerate(lim_items):
     add_rich(s, MARGIN + Inches(0.85), y - Inches(0.02), Inches(10.9), Inches(0.9),
               [[(head + " — ", color, True, False, 15.5), (desc, CREAM, False, False, 14)]],
               line_spacing=1.2)
-footer_page(s, 11)
+footer_page(s, next(page_num))
 
 # ---- Слайд 12: выводы -----------------------------------------------
 s = add_slide(prs)
@@ -492,24 +581,34 @@ add_text(s, MARGIN + Inches(0.35), Inches(6.1), SLIDE_W - 2 * MARGIN - Inches(0.
           "Дальше: добавить кратеры с неопределённым происхождением, расширить географию, "
           "автоматизировать первичное детектирование кандидатов.",
           size=12.5, color=GOLD, italic=True, anchor=MSO_ANCHOR.MIDDLE, line_spacing=1.2)
-footer_page(s, 12)
+footer_page(s, next(page_num))
 
 # ---- Слайд 13: литература -----------------------------------------------
 s = add_slide(prs)
 add_title(s, "Литература")
-refs = [
+refs_left = [
     "1. Koeberl C. Remote sensing studies of impact craters: how to be sure? // "
     "Comptes Rendus Geoscience. 2004.",
     "2. Gottwald M., et al. Remote sensing of terrestrial impact craters: The TanDEM-X "
     "digital elevation model // Meteoritics & Planetary Science. 2017.",
     "3. Kring D. A. Guidebook to the Geology of Barringer Meteorite Crater, Arizona. "
     "2nd ed. Houston: Lunar and Planetary Institute, 2017.",
+]
+refs_right = [
     "4. Creation of High Resolution Terrain Models of Barringer Meteorite Crater "
     "(Meteor Crater) Using Photogrammetry and Terrestrial Laser Scanning Methods. "
     "NASA NTRS, 2009.",
+    "5. McHone J. F., et al. Space shuttle observations of terrestrial impact structures "
+    "using SIR-C and X-SAR radars // Meteoritics & Planetary Science. 2002.",
+    "6. van Gasselt S., et al. The Oasis impact structure, Libya: geological "
+    "characteristics from ALOS PALSAR-2 data interpretation // "
+    "Earth, Planets and Space. 2017.",
 ]
-add_text(s, MARGIN, Inches(1.9), SLIDE_W - 2 * MARGIN, Inches(2.6),
-          "\n\n".join(refs), size=13, color=CREAM, line_spacing=1.3)
+ref_col_w = Inches((SLIDE_W.inches - 2 * MARGIN.inches - 0.4) / 2)
+add_text(s, MARGIN, Inches(1.75), ref_col_w, Inches(3.0),
+          "\n\n".join(refs_left), size=12, color=CREAM, line_spacing=1.28)
+add_text(s, MARGIN + ref_col_w + Inches(0.4), Inches(1.75), ref_col_w, Inches(3.0),
+          "\n\n".join(refs_right), size=12, color=CREAM, line_spacing=1.28)
 
 add_text(s, MARGIN, Inches(5.5), SLIDE_W - 2 * MARGIN, Inches(0.5),
           "Ключевые слова: дистанционное зондирование Земли, импактные структуры, ударные кратеры, "
@@ -519,7 +618,7 @@ add_text(s, MARGIN, Inches(5.5), SLIDE_W - 2 * MARGIN, Inches(0.5),
 add_text(s, MARGIN, Inches(6.5), SLIDE_W - 2 * MARGIN, Inches(0.7),
           "Спасибо за внимание", size=22, color=TERRACOTTA, bold=True, font=HEAD_FONT,
           align=PP_ALIGN.CENTER)
-footer_page(s, 13)
+footer_page(s, next(page_num))
 
 prs.save("crater_presentation.pptx")
 print("Сохранено: crater_presentation.pptx")
