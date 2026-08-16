@@ -2,9 +2,18 @@
 
 # Сырые спутниковые/DEM-экспорты из Earth Engine (тяжёлые, легко переполучить
 # заново через gee_crater_app.js) и их png-превью — не нужны в репозитории.
+# Старое и новое (после расширения экспорта) именование файлов -- сразу оба.
 *.tif
+*.zip
 S2_RGB_*.png
 DEM_*.png
 Hillshade_*.png
 Slope_*.png
 S1_VVVH_*.png
+*_DEM_*.png
+*_Hillshade_*.png
+*_Slope_*.png
+*_S1_VVVH_*.png
+*_S2_RGB_*.png
+*_S2_SWIR_*.png
+*_S2_NDVI_*.png

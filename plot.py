@@ -50,7 +50,7 @@ RIDGE_OFFSET = 70  # вертикальный сдвиг между разрез
 # Загрузка данных
 # ---------------------------------------------------------------------------
 
-csv_matches = sorted(glob.glob("profile_*.csv"))
+csv_matches = sorted(glob.glob("*Barringer*profile_raw*.csv")) or sorted(glob.glob("profile_*.csv"))
 if not csv_matches:
     raise FileNotFoundError(
         "В этой папке не найден файл profile_*.csv — сначала экспортируйте "
@@ -81,8 +81,6 @@ print(f"Длина профиля: {max_radius_m:.0f} м")
 # Характеристики кратера
 # ---------------------------------------------------------------------------
 
-floor_elev = min(s.iloc[0] for s in profiles.values())  # высота в центре
-
 rim_radius, rim_elev = {}, {}
 for az, s in profiles.items():
     band = s[(s.index >= RIM_SEARCH_MIN_M) & (s.index <= RIM_SEARCH_MAX_M)]
@@ -90,9 +88,23 @@ for az, s in profiles.items():
     rim_radius[az] = r
     rim_elev[az] = band.loc[r]
 
-mean_rim_radius = float(np.mean(list(rim_radius.values())))
-mean_rim_elev = float(np.mean(list(rim_elev.values())))
-rim_radius_cv_percent = float(np.std(list(rim_radius.values())) / mean_rim_radius * 100)
+# Если рядом лежит metadata_*.csv из обновлённого gee_crater_app.js --
+# берём итоговые дно/гребень/CV оттуда (устойчивый расчёт: медиана
+# центральной зоны для дна, проверка чувствительности окна поиска для
+# гребня) вместо упрощённого пересчёта ниже -- для согласованности со
+# всеми остальными графиками и презентацией.
+meta_matches = sorted(glob.glob("*Barringer*metadata*.csv"))
+if meta_matches:
+    meta = pd.read_csv(meta_matches[0]).iloc[0]
+    floor_elev = float(meta["floor_elevation_m"])
+    mean_rim_elev = float(meta["rim_elevation_m"])
+    mean_rim_radius = float(meta["rim_radius_m"])
+    rim_radius_cv_percent = float(meta["rim_radius_cv_percent"])
+else:
+    floor_elev = min(s.iloc[0] for s in profiles.values())  # высота в центре
+    mean_rim_radius = float(np.mean(list(rim_radius.values())))
+    mean_rim_elev = float(np.mean(list(rim_elev.values())))
+    rim_radius_cv_percent = float(np.std(list(rim_radius.values())) / mean_rim_radius * 100)
 depth = mean_rim_elev - floor_elev
 
 print(f"Дно (центр): {floor_elev:.0f} м; средний гребень вала: {mean_rim_elev:.0f} м")

@@ -1,0 +1,2 @@
+system:index,aoi_radius_km,center_lat,center_lon,crater_name,date_end,date_start,dem_mode,dem_scale_m,dem_source,depth_m,floor_elevation_m,floor_elevation_std_m,n_azimuths,profile_km,rim_elevation_m,rim_radius_cv_percent,rim_radius_m,rim_radius_std_m,s1_orbit_mode,s1_scene_count,s2_scene_count,step_m,warnings,.geo
+0,2,19.976683055397494,76.50842106901827,"Lonar, Индия",2025-12-31,2023-01-01,best,10,Copernicus GLO-30 (~30 м),96.375,480,0,8,1.5,576.375,1.455504880309981,892.5,12.99038105676658,BOTH,149,122,30,,"{""type"":""MultiPoint"",""coordinates"":[]}"

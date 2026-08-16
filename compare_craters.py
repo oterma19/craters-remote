@@ -21,43 +21,22 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 
-RIM_SEARCH_FRACTIONS = (0.2, 0.64)  # доля max_radius_m -- полоса поиска гребня
-
-
-def measure_crater(csv_path):
-    df = pd.read_csv(csv_path)
-    df = (
-        df[["azimuth", "distance_m", "DEM"]]
-        .dropna(subset=["DEM"])
-        .sort_values(["azimuth", "distance_m"])
-    )
-    azimuths = sorted(df["azimuth"].unique())
-    profiles = {
-        az: df[df["azimuth"] == az].set_index("distance_m")["DEM"]
-        for az in azimuths
-    }
-    max_radius_m = max(s.index.max() for s in profiles.values())
-    rim_min_m = RIM_SEARCH_FRACTIONS[0] * max_radius_m
-    rim_max_m = RIM_SEARCH_FRACTIONS[1] * max_radius_m
-
-    floor_elev = min(s.iloc[0] for s in profiles.values())
-    rim_radius, rim_elev = {}, {}
-    for az, s in profiles.items():
-        band = s[(s.index >= rim_min_m) & (s.index <= rim_max_m)]
-        r = band.idxmax()
-        rim_radius[az] = r
-        rim_elev[az] = band.loc[r]
-
-    mean_rim_radius = float(np.mean(list(rim_radius.values())))
-    mean_rim_elev = float(np.mean(list(rim_elev.values())))
-    circularity = float(np.std(list(rim_radius.values())) / mean_rim_radius * 100)
-
+def measure_crater(meta_csv_path):
+    """Читает готовые (устойчиво посчитанные в GEE) параметры кратера из
+    metadata_*.csv -- медиана центральной зоны для дна, окно поиска с
+    проверкой чувствительности для гребня. Не пересчитываем заново в
+    Python, чтобы не разойтись с остальными графиками/приложением."""
+    meta = pd.read_csv(meta_csv_path).iloc[0]
+    mean_rim_radius = float(meta["rim_radius_m"])
+    floor_elev = float(meta["floor_elevation_m"])
+    mean_rim_elev = float(meta["rim_elevation_m"])
     return {
         "diameter_m": 2 * mean_rim_radius,
         "depth_m": mean_rim_elev - floor_elev,
         "floor_elev_m": floor_elev,
         "rim_elev_m": mean_rim_elev,
-        "circularity_pct": circularity,
+        "rim_radius_cv_percent": float(meta["rim_radius_cv_percent"]),
+        "dem_source": str(meta["dem_source"]),
     }
 
 
@@ -67,7 +46,7 @@ def measure_crater(csv_path):
 
 CRATERS = {
     "Барринджер\n(Meteor Crater)": {
-        "csv": "profile_Barringer__Meteor_Crater______.csv",
+        "meta_pattern": "*Barringer*metadata*.csv",
         "published_diameter_m": 1200,
         "published_depth_m": 170,
         "age": "50 тыс. лет",
@@ -75,7 +54,7 @@ CRATERS = {
         "color": "#c1440e",
     },
     "Lonar": {
-        "csv": "profile_Lonar_______.csv",
+        "meta_pattern": "*Lonar*metadata*.csv",
         "published_diameter_m": 1830,
         "published_depth_m": 137,  # среднее по диапазону 120-150 м из литературы
         "age": "~570 / ~37.5 тыс. лет*",
@@ -83,7 +62,7 @@ CRATERS = {
         "color": "#5b8a72",
     },
     "Wolfe Creek": {
-        "csv": "profile_Wolfe_Creek___________.csv",
+        "meta_pattern": "*Wolfe_Creek*metadata*.csv",
         "published_diameter_m": 892,
         "published_depth_m": 178,  # исходная глубина ДО заполнения осадками
         "age": "120 тыс. лет",
@@ -98,9 +77,9 @@ CRATERS = {
 
 results = {}
 for name, info in CRATERS.items():
-    matches = glob.glob(info["csv"])
+    matches = glob.glob(info["meta_pattern"])
     if not matches:
-        print(f"[пропуск] нет файла {info['csv']} для «{name}»")
+        print(f"[пропуск] нет файла {info['meta_pattern']} для «{name}»")
         continue
     m = measure_crater(matches[0])
     results[name] = m

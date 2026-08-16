@@ -1,0 +1,2 @@
+system:index,aoi_radius_km,center_lat,center_lon,crater_name,date_end,date_start,dem_mode,dem_scale_m,dem_source,depth_m,floor_elevation_m,floor_elevation_std_m,n_azimuths,profile_km,rim_elevation_m,rim_radius_cv_percent,rim_radius_m,rim_radius_std_m,s1_orbit_mode,s1_scene_count,s2_scene_count,step_m,warnings,.geo
+0,2,35.027,-111.0228,"Barringer (Meteor Crater), США",2025-12-31,2023-01-01,best,10,USGS 3DEP 1 m (лидар),159.375,1565,2.917187453505326,8,1.5,1724.375,5,600,30,BOTH,110,295,30,,"{""type"":""MultiPoint"",""coordinates"":[]}"

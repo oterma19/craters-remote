@@ -428,25 +428,26 @@ def case_slide(title_txt, chart_path, s2_path, color, stat_rows, note):
 
 
 case_slide("Кейс 1 — Барринджер (Meteor Crater)",
-           "case_Barringer.png", "S2_RGB_Barringer__Meteor_Crater______.png", TERRACOTTA,
+           "case_Barringer.png", "Barringer__Meteor_Crater_______S2_RGB_2023_2025.png", TERRACOTTA,
            [("Диаметр:", "1200 м", "1200 м"),
-            ("Глубина:", "162 м", "170 м"),
-            ("d/D:", "0.135", "0.142")],
+            ("Глубина:", "159 м", "170 м"),
+            ("d/D:", "0.133", "0.142")],
            "Осадочные породы, ~50 тыс. лет. Наилучшее совпадение с публикацией — "
-           "валидация метода на эталонном объекте.")
+           "валидация метода на эталонном объекте (DEM: USGS 3DEP, лидар 1 м).")
 
 case_slide("Кейс 2 — Lonar",
-           "case_Lonar.png", "S2_RGB_Lonar_______.png", SAGE,
-           [("Диаметр:", "1890 м", "1830 м"),
-            ("Глубина:", "111 м", "~137 м"),
-            ("d/D:", "0.059", "0.075")],
+           "case_Lonar.png", "Lonar________S2_RGB_2023_2025.png", SAGE,
+           [("Диаметр:", "1785 м", "1830 м"),
+            ("Глубина:", "96 м", "~137 м"),
+            ("d/D:", "0.054", "0.075")],
            "Базальт (Деканские траппы). Два конфликтующих датирования: ~570 или ~37.5 тыс. лет. "
-           "Глубина занижена — вероятно, DEM видит поверхность озера в кратере, а не истинное дно.")
+           "Глубина занижена — зональная статистика подтверждает: NDVI дна ≈ −0.42 (вода), "
+           "а не истинное дно кратера.")
 
 case_slide("Кейс 3 — Wolfe Creek",
-           "case_WolfeCreek.png", "S2_RGB_Wolfe_Creek___________.png", GOLD,
-           [("Диаметр:", "930 м", "892 м"),
-            ("Глубина:", "46 м", "178 м*")],
+           "case_WolfeCreek.png", "Wolfe_Creek____________S2_RGB_2023_2025.png", GOLD,
+           [("Диаметр:", "915 м", "892 м"),
+            ("Глубина:", "45 м", "178 м*")],
            "Песчаник, ~120 тыс. лет. *Исходная глубина по публикации — кратер занесён ~120 м песка; "
            "наш профиль отражает современную, а не исходную форму.")
 
@@ -535,6 +536,70 @@ s = add_slide(prs)
 add_title(s, "Наши измерения vs публикации vs эталон свежих кратеров")
 add_image_fit(s, "crater_geology_comparison.png", MARGIN, Inches(1.55),
                SLIDE_W - 2 * MARGIN, Inches(5.5), center_h=True, center_v=False)
+footer_page(s, next(page_num))
+
+# ---- Слайд 10b: нормированные профили -----------------------------------------------
+s = add_slide(prs)
+add_title(s, "Форма кратеров независимо от масштаба",
+           "r_norm = distance / mean_rim_radius, h_norm = (DEM - дно) / (гребень - дно)")
+add_image_fit(s, "normalized_profile_compare.png", MARGIN, Inches(1.55),
+               SLIDE_W - 2 * MARGIN, Inches(5.45), center_h=True, center_v=False)
+footer_page(s, next(page_num))
+
+# ---- Слайд 10c: зональная статистика -----------------------------------------------
+s = add_slide(prs)
+add_title(s, "Зональная статистика: радар и оптика по 4 зонам",
+           "дно / склон+вал / выбросы / равнина — Lonar и Wolfe Creek")
+
+zs_img_w = Inches(7.6)
+add_image_fit(s, "zonal_stats_compare.png", MARGIN, Inches(1.5), zs_img_w, Inches(5.6),
+              center_h=False, center_v=False)
+
+zs_right_x = MARGIN + zs_img_w + Inches(0.3)
+zs_right_w = SLIDE_W - MARGIN - zs_right_x
+add_card(s, zs_right_x, Inches(1.5), zs_right_w, Inches(5.6), color=CARD)
+add_rich(s, zs_right_x + Inches(0.3), Inches(1.75), zs_right_w - Inches(0.6), Inches(5.1),
+          [[("Выводы", GOLD, True, False, 15)],
+           [("", CREAM, False, False, 6)],
+           [("Радар: дно темнее вала на обоих кратерах при разбиении "
+             "на 4 зоны — тот же эффект, что и на слайде про радар, "
+             "теперь подтверждён более детально.", CREAM, False, False, 12.5)],
+           [("", CREAM, False, False, 8)],
+           [("Lonar, NDVI дна ≈ −0.42", SAGE, True, False, 12.5)],
+           [("отрицательный NDVI = вода. Прямое независимое "
+             "подтверждение: заниженная глубина Lonar объясняется "
+             "озером на дне, а не ошибкой измерения.", CREAM, False, False, 12.5)],
+           [("", CREAM, False, False, 8)],
+           [("Wolfe Creek, NDVI дна ≈ 0.03", GOLD, True, False, 12.5)],
+           [("почти ноль — голый песок, без воды. Заниженная глубина "
+             "здесь имеет другую причину (занесение песком), хотя "
+             "числа похожи на Lonar.", CREAM, False, False, 12.5)]],
+          line_spacing=1.28)
+footer_page(s, next(page_num))
+
+# ---- Слайд 10d: SWIR снимки -----------------------------------------------
+s = add_slide(prs)
+add_title(s, "SWIR: что видно за пределами RGB",
+           "B12/B8/B4 (SWIR-композит) — Lonar и Wolfe Creek; NDVI/NDMI по зонам см. на предыдущем слайде")
+
+swir_cols = [
+    ("Lonar", "Lonar________S2_SWIR_2023_2025.png"),
+    ("Wolfe Creek", "Wolfe_Creek____________S2_SWIR_2023_2025.png"),
+]
+sw_col_w = Inches(5.8)
+sw_gap = Inches(0.4)
+sw_img_h = Inches(4.5)
+name_y = Inches(1.6)
+img_y = Inches(2.05)
+cap_y = img_y + sw_img_h + Inches(0.1)
+for i, (name, swir_path) in enumerate(swir_cols):
+    x = MARGIN + i * (sw_col_w + sw_gap)
+    add_text(s, x, name_y, sw_col_w, Inches(0.35), name, size=16, color=CREAM,
+              bold=True, align=PP_ALIGN.CENTER, font=HEAD_FONT)
+    add_image_fit(s, swir_path, x, img_y, sw_col_w, sw_img_h, center_h=True)
+    add_text(s, x, cap_y, sw_col_w, Inches(0.25),
+              "SWIR-композит (B12/B8/B4)", size=11, color=MUTED, italic=True, align=PP_ALIGN.CENTER)
+
 footer_page(s, next(page_num))
 
 # ---- Слайд 11: ограничения -----------------------------------------------
